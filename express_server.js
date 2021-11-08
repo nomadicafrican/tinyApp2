@@ -1,4 +1,5 @@
 const express = require('express');
+const { url } = require('inspector');
 const app = express();
 const PORT = 8080;
 
@@ -12,4 +13,9 @@ app.get('/', (req,res)=>{
 });
 app.listen(PORT,()=>{
 console.log(`Example app listening on port ${PORT}`)
+})
+
+app.get('/urls.json',(req,res)=>{
+  res.json(urlDatabase)
+
 })

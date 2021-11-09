@@ -1,7 +1,7 @@
 const express = require('express');
 const { url } = require('inspector');
 const app = express();
-const PORT = 8080;
+const PORT = 8000;
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 const { match } = require('assert');
@@ -21,9 +21,23 @@ return str
     
 app.post("/urls", (req, res) => {
   //console.log('i got here')
-  console.log(generateRandomString())
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  //console.log(generateRandomString())
+  //console.log(req.body); 
+  const shortURl = generateRandomString()
+  const longURL = req.body.longURL
+  //const userId = req.session['user_id']
+  urlDatabase[shortURl] =  longURL //userId: userId  // Log the POST request body to the console
+  console.log(urlDatabase)
+  res.redirect(`/urls/${shortURl}`);         // Respond with 'Ok' (we will replace this)
+});
+app.get("/u/:shortURL", (req, res) => {
+  // const longURL = req.body.longURL
+  // res.redirect(longURL);
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL]
+  console.log(shortURL, longURL)
+ // console.log(req.body.longURL)
+  res.redirect(longURL)
 });
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };

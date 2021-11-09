@@ -18,7 +18,6 @@ while (str.length < 6){
 }
 return str
 }
-    
 app.post("/urls", (req, res) => {
   //console.log('i got here')
   //console.log(generateRandomString())
@@ -36,7 +35,7 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
   const longURL = urlDatabase[shortURL]
   console.log(shortURL, longURL)
- // console.log(req.body.longURL)
+  // console.log(req.body.longURL)
   res.redirect(longURL)
 });
 app.get("/urls", (req, res) => {
@@ -50,17 +49,22 @@ app.get('/', (req,res)=>{
   res.send("hello")
 });
 app.listen(PORT,()=>{
-console.log(`Example app listening on port ${PORT}`)
+  console.log(`Example app listening on port ${PORT}`)
 })
 
 app.get('/urls.json',(req,res)=>{
   res.json(urlDatabase)
-
+  
 })
 app.get('/hello',(req,res)=>{
-res.send('<html><body> Hello <b> World </b> </body></html>\n')
+  res.send('<html><body> Hello <b> World </b> </body></html>\n')
 })
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
   res.render("urls_show", templateVars);
 });
+app.post('/urls/:shortURL/delete', (req,res)=>{
+  console.log(req.params.shortURL)
+delete urlDatabase[req.params.shortURL]
+res.redirect('/urls')
+})

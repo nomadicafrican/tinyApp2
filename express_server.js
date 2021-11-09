@@ -2,11 +2,13 @@ const express = require('express');
 const { url } = require('inspector');
 const app = express();
 const PORT = 8000;
+const cookieParser = require('cookie-parser')
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
+app.use(cookieParser());
 const { match } = require('assert');
 app.use(bodyParser.urlencoded({extended: true}));
-const urlDatabase = {
+const urlDatabase = { 
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': "http://www.google.com"
 };
@@ -39,7 +41,10 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL)
 });
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const username = req.cookies['username']
+  console.log(req.cookies)
+  console.log(username)
+  const templateVars = { urls: urlDatabase , username };
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
@@ -60,11 +65,25 @@ app.get('/hello',(req,res)=>{
   res.send('<html><body> Hello <b> World </b> </body></html>\n')
 })
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 app.post('/urls/:shortURL/delete', (req,res)=>{
   console.log(req.params.shortURL)
 delete urlDatabase[req.params.shortURL]
 res.redirect('/urls')
+})
+app.post('/urls/:shortURL',(req,res)=>{
+  const shortURL = req.params.shortURL
+  const longURL = req.body.longURL
+  urlDatabase[shortURL] = longURL
+  res.redirect('/urls')
+})
+app.post('/login' ,(req,res) =>{
+res.cookie('username', req.body.username)
+res.redirect('/urls')
+})
+app.post('/logout',(req,res)=>{
+  res.clearCookie('username')
+  res.redirect('/urls')
 })

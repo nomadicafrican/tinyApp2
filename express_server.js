@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(cookieParser());
+const bcrypt = require("bcryptjs");
 const { match } = require("assert");
 app.use(bodyParser.urlencoded({ extended: true }));
 const morgan = require("morgan");
@@ -59,9 +60,6 @@ const getUserByEmail = (email) => {
   return null;
 };
 
-const checkPassword = (user, password) => {
-  return user.password === password;
-};
 const urlsForUser = (id) => {
   const obj = {};
   for (const shortURL in urlDatabase) {
@@ -98,7 +96,7 @@ app.get("/urls", (req, res) => {
   //console.log("urlDatabase", urlDatabase);
   // console.log(req.cookies)
   //console.log(username)
-  console.log(user, req.cookies.user_id);
+  //console.log(user, req.cookies.user_id);
   if (user) {
     const templateVars = { urls: urlsForUser(req.cookies.user_id), user };
     return res.render("urls_index", templateVars);
@@ -140,7 +138,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 app.post("/urls/:shortURL/delete", (req, res) => {
   //console.log(req.params.shortURL)\
-  console.log("cookie", req.cookies.user_id);
+  //console.log("cookie", req.cookies.user_id);
   if (urlDatabase[req.params.shortURL].userID === req.cookies.user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
@@ -154,7 +152,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const currentUser = req.cookies.user_id;
   const user = users[currentUser];
 
-  if (user.id === currentUser) {
+  if (user.user_id === currentUser) {
     urlDatabase[shortURL].longURL = longURL;
     return res.redirect("/urls");
   }
@@ -165,11 +163,11 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = getUserByEmail(email);
+  //console.log(users[user.id]);
   if (!user) {
     res.status(403).send("Email does not exist");
   }
-  const checkThePassword = checkPassword(user, password);
-  if (!checkThePassword) {
+  if (!bcrypt.compareSync(password, users[user.id].password)) {
     res.status(403).send("wrong password");
   }
   res.cookie("user_id", user.id);
@@ -190,19 +188,22 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const id = generateRandomString();
   const strings = checkValidInput(email, password);
-  //console.log(email, password)
-  //console.log(strings)
   if (!strings) {
     return res.status(403).send("Pls enter valid information");
   }
   const user = getUserByEmail(email);
-  //console.log(user)
+
   if (user) {
     return res.status(403).send("pls enter new email");
   }
-  users[id] = { id, email, password };
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  //console.log("hashhed pass", hashedPassword);
+
+  users[id] = { id, email, password: hashedPassword };
   res.cookie("user_id", id);
   res.redirect("/urls");
+
+  res.render("plslogin");
 });
 app.get("/login", (req, res) => {
   const templateVars = { user: null };

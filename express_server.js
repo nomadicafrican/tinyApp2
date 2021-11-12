@@ -1,11 +1,19 @@
 const express = require("express");
+
 const { url } = require("inspector");
+
 const app = express();
+
 const PORT = 8000;
+
 const cookieSession = require("cookie-session");
+
 app.set("view engine", "ejs");
+
 const bodyParser = require("body-parser");
+
 const { checkValidInput, urlsForUser, getUserByEmail } = require("./helpers");
+
 app.use(
   cookieSession({
     name: "session",
@@ -17,10 +25,25 @@ app.use(
 );
 
 const bcrypt = require("bcryptjs");
+
 const { match } = require("assert");
+
 app.use(bodyParser.urlencoded({ extended: true }));
+
 const morgan = require("morgan");
+
 app.use(morgan("dev"));
+
+function generateRandomString() {
+  let array = [1, 2, 3, "a", "v", "n", "l", 0];
+  let str = "";
+  while (str.length < 6) {
+    str += array[Math.floor(Math.random() * 6)];
+  }
+  return str;
+}
+
+// DATABASES//
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -31,14 +54,6 @@ const urlDatabase = {
     userID: "aJ48lW",
   },
 };
-function generateRandomString() {
-  let array = [1, 2, 3, "a", "v", "n", "l", 0];
-  let str = "";
-  while (str.length < 6) {
-    str += array[Math.floor(Math.random() * 6)];
-  }
-  return str;
-}
 
 const users = {
   userRandomID: {
@@ -52,33 +67,24 @@ const users = {
     password: "dishwasher-funk",
   },
 };
+//DATABASES//
 
-//HELPER FUNCTIONS END
-
+// THE ACTUAL CODE//
 app.post("/urls", (req, res) => {
   const shortURl = generateRandomString();
   const longURL = req.body.longURL;
-  //const userId = req.session['user_id']
-  // urlDatabase[shortURl] = longURL; // Log the POST request body to the console
   urlDatabase[shortURl] = { longURL, userID: req.session.user_id };
-  //console.log(urlDatabase)
-  res.redirect(`/urls/${shortURl}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortURl}`);
 });
+
 app.get("/u/:shortURL", (req, res) => {
-  // const longURL = req.body.longURL
-  // res.redirect(longURL);
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
-  //console.log(shortURL, longURL)
-  // console.log(req.body.longURL)
   res.redirect(longURL);
 });
+
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  //console.log("urlDatabase", urlDatabase);
-  // console.log(req.cookies)
-  //console.log(username)
-  //console.log(user, req.cookies.user_id);
   if (user) {
     const templateVars = {
       urls: urlsForUser(req.session.user_id, urlDatabase),
@@ -91,7 +97,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user_id = req.session["user_id"];
-  //console.log("user_id", user_id);
+
   if (!user_id) {
     return res.redirect("/urls");
   }
@@ -113,6 +119,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body> Hello <b> World </b> </body></html>\n");
 });
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
@@ -121,9 +128,8 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
 app.post("/urls/:shortURL/delete", (req, res) => {
-  //console.log(req.params.shortURL)\
-  //console.log("cookie", req.cookies.user_id);
   if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
@@ -131,6 +137,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     res.status(401).send("not your URL");
   }
 });
+
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
@@ -148,7 +155,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = getUserByEmail(email, users);
-  //console.log(users[user.id]);
+
   if (!user) {
     res.status(403).send("Email does not exist");
   }
@@ -173,6 +180,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const id = generateRandomString();
   const strings = checkValidInput(email, password);
+
   if (!strings) {
     return res.status(403).send("Pls enter valid information");
   }
@@ -182,7 +190,6 @@ app.post("/register", (req, res) => {
     return res.status(403).send("pls enter new email");
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
-  //console.log("hashhed pass", hashedPassword);
 
   users[id] = { id, email, password: hashedPassword };
   req.session.user_id = id;
@@ -190,6 +197,7 @@ app.post("/register", (req, res) => {
 
   res.render("plslogin");
 });
+
 app.get("/login", (req, res) => {
   const templateVars = { user: null };
   res.render("urls_login", templateVars);

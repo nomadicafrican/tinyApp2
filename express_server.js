@@ -12,7 +12,12 @@ app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 
-const { checkValidInput, urlsForUser, getUserByEmail } = require("./helpers");
+const {
+  checkValidInput,
+  urlsForUser,
+  getUserByEmail,
+  generateRandomString,
+} = require("./helpers");
 
 app.use(
   cookieSession({
@@ -32,15 +37,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const morgan = require("morgan");
 
 app.use(morgan("dev"));
-
-function generateRandomString() {
-  let array = [1, 2, 3, "a", "v", "n", "l", 0];
-  let str = "";
-  while (str.length < 8) {
-    str += array[Math.floor(Math.random() * 8)];
-  }
-  return str;
-}
 
 const urlDatabase = {
   b6UTxQ: {
@@ -184,20 +180,20 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session = null; // deletes cookies from browser
   res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
+  const shortURL = generateRandomString(); // uses function generateRandomString to give random string.
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
   res.redirect(`/urls`);
 });
 
 app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const email = req.body.email; // the email typed in by user
+  const password = req.body.password; // the password typed in by user
   const id = generateRandomString();
   const strings = checkValidInput(email, password);
 

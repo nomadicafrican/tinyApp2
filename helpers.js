@@ -27,6 +27,19 @@ const urlsForUser = (id, database) => {
   // console.log(urlDatabase);
   return obj;
 };
+function generateRandomString() {
+  let array = [1, 2, 3, "a", "v", "n", "l", 0];
+  let str = "";
+  while (str.length < 8) {
+    str += array[Math.floor(Math.random() * 8)];
+  }
+  return str;
+}
 //HELPER FUNCTIONS END
 
-module.exports = { checkValidInput, urlsForUser, getUserByEmail };
+module.exports = {
+  checkValidInput,
+  urlsForUser,
+  getUserByEmail,
+  generateRandomString,
+};

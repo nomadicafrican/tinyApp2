@@ -73,18 +73,26 @@ app.get("/urls", (req, res) => {
   }
   res.render("plslogin");
 });
+
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  const currentUser = req.session.user_id;
+  if (!currentUser) {
+    res.redirect("/register");
+  }
   const longURL = urlDatabase[shortURL].longURL;
-  if (req.secure) {
-    res.redirect(longURL);
+  if (!longURL) {
+    return res.status(404).send("URL does not exist");
+  }
+  if (!longURL.startsWith("http")) {
+    res.redirect("http://" + longURL);
   } else {
-    res.redirect("https://" + longURL);
+    res.redirect(longURL);
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  const user_id = req.session["user_id"];
+  const user_id = req.session.user_id;
 
   if (!user_id) {
     return res.redirect("/urls");
@@ -95,7 +103,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("hello");
+  res.render("plslogin");
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
@@ -110,6 +118,9 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
+  if (!userID) {
+    res.redirect("/");
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = {
@@ -128,7 +139,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: null };
+  const templateVars = { user: users[req.session.user_id] };
   if (req.session.user_id) {
     res.redirect("/urls");
   }
@@ -136,10 +147,10 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: null };
   if (req.session.user_id) {
     res.redirect("/urls");
   }
+  const templateVars = { user: users[req.session.user_id] };
   res.render("urls_login", templateVars);
 });
 
@@ -155,6 +166,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const currentUser = req.session.user_id;
+  if (!currentUser) {
+    res.redirect("/login");
+  }
   if (currentUser && currentUser === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");

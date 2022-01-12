@@ -226,4 +226,5 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 
   res.render("plslogin");
+  console.log("ammar ali");
 });

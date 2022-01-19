@@ -70,8 +70,9 @@ app.get("/urls", (req, res) => {
       user: user,
     };
     res.render("urls_index", templateVars);
+  } else {
+    res.render("plslogin");
   }
-  res.render("plslogin");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -224,7 +225,4 @@ app.post("/register", (req, res) => {
   users[id] = { id, email, password: hashedPassword };
   req.session.user_id = id;
   res.redirect("/urls");
-
-  res.render("plslogin");
-  console.log("ammar ali");
 });

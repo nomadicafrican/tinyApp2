@@ -73,6 +73,7 @@ app.get("/urls", (req, res) => {
   } else {
     res.render("plslogin");
   }
+  console.log("ammar");
 });
 
 app.get("/u/:shortURL", (req, res) => {

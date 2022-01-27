@@ -79,7 +79,7 @@ app.get("/urls", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
-  const currentUser = req.session.user_id;
+  // const currentUser = req.session.user_id;
   // const user = users[user_id];
   // const templateVars = { user };
   // if (!currentUser) {

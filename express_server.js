@@ -212,6 +212,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password; // the password typed in by user
   const id = generateRandomString();
   const strings = checkValidInput(email, password);
+  console.log("ammar number 2");
 
   if (!strings) {
     return res.status(403).send("Pls enter valid information");

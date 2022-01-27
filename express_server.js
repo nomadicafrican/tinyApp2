@@ -78,10 +78,13 @@ app.get("/urls", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+
   const currentUser = req.session.user_id;
-  if (!currentUser) {
-    res.redirect("/register");
-  }
+  // const user = users[user_id];
+  // const templateVars = { user };
+  // if (!currentUser) {
+  //   res.redirect("/register");
+  // }
   const longURL = urlDatabase[shortURL].longURL;
   if (!longURL) {
     return res.status(404).send("URL does not exist");
@@ -168,6 +171,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const currentUser = req.session.user_id;
+  const user = users[req.session.user_id];
   if (!currentUser) {
     res.redirect("/login");
   }

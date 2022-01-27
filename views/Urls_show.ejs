@@ -12,6 +12,9 @@
     crossorigin="anonymous"
   />
   <title>TinyApp</title>
+  <% if(user){ %>
+    you are logged in as <%= user.email %>
+    <% } %>
 </head>
     <div class="card text-center">
       <div class="card-header"></div>

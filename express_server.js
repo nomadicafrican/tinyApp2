@@ -73,7 +73,6 @@ app.get("/urls", (req, res) => {
   } else {
     res.render("plslogin");
   }
-  console.log("ammar");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -84,7 +83,7 @@ app.get("/u/:shortURL", (req, res) => {
   // const templateVars = { user };
   // if (!currentUser) {
   //   res.redirect("/register");
-  // }
+  // } -----> this is the functionality of letting a non logged in user access the shortURL or not
   const longURL = urlDatabase[shortURL].longURL;
   if (!longURL) {
     return res.status(404).send("URL does not exist");
@@ -109,9 +108,6 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/", (req, res) => {
   res.render("plslogin");
-});
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -200,23 +196,22 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session = null; // deletes cookies from browser
+  req.session = null;
   res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(); // uses function generateRandomString to give random string.
+  const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
   res.redirect(`/urls`);
 });
 
 app.post("/register", (req, res) => {
-  const email = req.body.email; // the email typed in by user
-  const password = req.body.password; // the password typed in by user
+  const email = req.body.email;
+  const password = req.body.password;
   const id = generateRandomString();
   const strings = checkValidInput(email, password);
-  console.log("ammar number 2");
 
   if (!strings) {
     return res.status(403).send("Pls enter valid information");
@@ -231,4 +226,8 @@ app.post("/register", (req, res) => {
   users[id] = { id, email, password: hashedPassword };
   req.session.user_id = id;
   res.redirect("/urls");
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });

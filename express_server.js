@@ -8,36 +8,16 @@ const PORT = 8080;
 
 const cookieSession = require("cookie-session");
 
-app.set("view engine", "ejs");
-
 const bodyParser = require("body-parser");
-
 const {
   checkValidInput,
   urlsForUser,
   getUserByEmail,
   generateRandomString,
 } = require("./helpers");
-
-app.use(
-  cookieSession({
-    name: "session",
-    keys: ["anything"],
-
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
-
-const bcrypt = require("bcryptjs");
-
 const { match } = require("assert");
-
-app.use(bodyParser.urlencoded({ extended: true }));
-
+const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
-
-app.use(morgan("dev"));
-
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -48,7 +28,6 @@ const urlDatabase = {
     userID: "aJ48lW",
   },
 };
-
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -61,6 +40,20 @@ const users = {
     password: "dishwasher-funk",
   },
 };
+app.set("view engine", "ejs");
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["anything"],
+
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(morgan("dev"));
 
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
